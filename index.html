@@ -1,1 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network QoS Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    /* === VARIABLES === */
+    :root {
+      --bg: #f4f1ec;
+      --bg-card: #ffffff;
+      --bg-result: #f8f6f2;
+      --border: #e0dbd0;
+      --border-accent: #c8a96e;
+      --text: #1a1612;
+      --text-muted: #8a7f72;
+      --text-result: #2c2520;
+      --accent: #b5541a;
+      --accent-light: #f0e6d8;
+      --accent2: #1a5c8a;
+      --accent3: #2a7a4a;
+      --accent4: #7a1a4a;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --shadow-hover: 0 6px 24px rgba(0,0,0,0.12);
+      --radius: 12px;
+    }
 
+    /* === BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* === HEADER === */
+    .qos-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .qos-header .badge-label {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      border: 1px solid var(--border-accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 0.75rem;
+    }
+
+    .qos-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 0.4rem;
+    }
+
+    .qos-header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+
+    /* === GRID === */
+    .qos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .qos-grid { grid-template-columns: 1fr; }
+    }
+
+    /* === CARD === */
+    .qos-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.25s ease, transform 0.25s ease;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .qos-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .qos-card:nth-child(1) { animation-delay: 0.1s; }
+    .qos-card:nth-child(2) { animation-delay: 0.2s; }
+    .qos-card:nth-child(3) { animation-delay: 0.3s; }
+    .qos-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* === CARD HEADER === */
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1rem 1.25rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--bg-card);
+      background: var(--accent-color, var(--accent));
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1rem;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    .card-icon {
+      margin-left: auto;
+      color: var(--accent-color, var(--accent));
+      font-size: 1.1rem;
+      opacity: 0.6;
+    }
+
+    /* card accent colors */
+    .card-throughput { --accent-color: #b5541a; }
+    .card-delay      { --accent-color: #1a5c8a; }
+    .card-jitter     { --accent-color: #2a7a4a; }
+    .card-loss       { --accent-color: #7a1a4a; }
+
+    /* === CARD BODY === */
+    .card-body-qos { padding: 1.25rem; }
+
+    /* === INPUT GROUP === */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .input-row label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      min-width: 110px;
+    }
+
+    .input-row input {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .input-row input:focus {
+      border-color: var(--accent-color, var(--accent));
+      background: #fff;
+    }
+
+    .input-row .unit {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* === BUTTON === */
+    .btn-hitung {
+      width: 100%;
+      margin-top: 0.75rem;
+      padding: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: var(--accent-color, var(--accent));
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .btn-hitung:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-hitung:active { transform: translateY(0); }
+
+    /* === RESULT AREA === */
+    .result-area {
+      margin-top: 1rem;
+      background: var(--bg-result);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      display: none;
+      animation: fadeIn 0.3s ease both;
+    }
+
+    .result-area.show { display: block; }
+
+    .result-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-color, var(--accent));
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .result-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* === STEP BY STEP === */
+    .result-steps {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-result);
+      line-height: 1.9;
+    }
+
+    .step-line {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.5rem;
+    }
+
+    .step-op {
+      color: var(--text-muted);
+      user-select: none;
+      text-align: right;
+    }
+
+    .step-val { color: var(--text-result); }
+
+    .step-final .step-val {
+      color: var(--accent-color, var(--accent));
+      font-weight: 500;
+    }
+
+    /* === PACKET LOSS BAR === */
+    .loss-bar-wrap {
+      margin-top: 0.75rem;
+    }
+
+    .loss-bar-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 0.4rem;
+    }
+
+    .loss-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent4);
+      transition: width 0.6s cubic-bezier(.4,0,.2,1);
+    }
+
+    .loss-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* === ERROR === */
+    .input-error {
+      font-size: 0.72rem;
+      color: #c0392b;
+      margin-top: 0.4rem;
+      display: none;
+    }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- === HEADER === -->
+<div class="qos-header">
+  <div class="badge-label">Wireshark · QoS Analysis</div>
+  <h1>Network QoS Calculator</h1>
+  <p>Hitung Throughput, Delay, Jitter, dan Packet Loss secara terpisah</p>
+</div>
+
+<!-- === GRID === -->
+<div class="qos-grid">
+
+  <!-- 1. THROUGHPUT -->
+  <div class="qos-card card-throughput">
+    <div class="card-head">
+      <div class="card-num">1</div>
+      <span class="card-title">Throughput</span>
+      <i class="bi bi-speedometer2 card-icon"></i>
+    </div>
+    <div class="card-body-qos">
+      <div class="input-row">
+        <label>Total Bytes</label>
+        <input type="number" id="tp-bytes" placeholder="581546" min="0" />
+        <span class="unit">bytes</span>
+      </div>
+      <div class="input-row">
+        <label>Time Span</label>
+        <input type="number" id="tp-time" placeholder="5.663" min="0" step="any" />
+        <span class="unit">detik</span>
+      </div>
+      <div class="input-error" id="tp-err">Masukkan nilai yang valid (> 0)</div>
+      <button class="btn-hitung" onclick="hitungThroughput()">Hitung Throughput</button>
+      <div class="result-area" id="tp-result">
+        <div class="result-label">Hasil</div>
+        <div class="result-steps" id="tp-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. DELAY -->
+  <div class="qos-card card-delay">
+    <div class="card-head">
+      <div class="card-num">2</div>
+      <span class="card-title">Delay</span>
+      <i class="bi bi-clock-history card-icon"></i>
+    </div>
+    <div class="card-body-qos">
+      <div class="input-row">
+        <label>Total Delay</label>
+        <input type="number" id="dl-total" placeholder="5.662696" min="0" step="any" />
+        <span class="unit">detik</span>
+      </div>
+      <div class="input-row">
+        <label>Jumlah Paket</label>
+        <input type="number" id="dl-paket" placeholder="665" min="1" />
+        <span class="unit">paket</span>
+      </div>
+      <div class="input-error" id="dl-err">Masukkan nilai yang valid (> 0)</div>
+      <button class="btn-hitung" onclick="hitungDelay()">Hitung Delay</button>
+      <div class="result-area" id="dl-result">
+        <div class="result-label">Hasil</div>
+        <div class="result-steps" id="dl-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. JITTER -->
+  <div class="qos-card card-jitter">
+    <div class="card-head">
+      <div class="card-num">3</div>
+      <span class="card-title">Jitter</span>
+      <i class="bi bi-activity card-icon"></i>
+    </div>
+    <div class="card-body-qos">
+      <div class="input-row">
+        <label>Total Jitter</label>
+        <input type="number" id="jt-total" placeholder="0.127412" min="0" step="any" />
+        <span class="unit">detik</span>
+      </div>
+      <div class="input-row">
+        <label>Jumlah Paket</label>
+        <input type="number" id="jt-paket" placeholder="665" min="1" />
+        <span class="unit">paket</span>
+      </div>
+      <div class="input-error" id="jt-err">Masukkan nilai yang valid (> 0)</div>
+      <button class="btn-hitung" onclick="hitungJitter()">Hitung Jitter</button>
+      <div class="result-area" id="jt-result">
+        <div class="result-label">Hasil</div>
+        <div class="result-steps" id="jt-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. PACKET LOSS -->
+  <div class="qos-card card-loss">
+    <div class="card-head">
+      <div class="card-num">4</div>
+      <span class="card-title">Packet Loss</span>
+      <i class="bi bi-wifi-off card-icon"></i>
+    </div>
+    <div class="card-body-qos">
+      <div class="input-row">
+        <label>Lost Segment</label>
+        <input type="number" id="pl-lost" placeholder="1" min="0" />
+        <span class="unit">paket</span>
+      </div>
+      <div class="input-row">
+        <label>Total Paket</label>
+        <input type="number" id="pl-total" placeholder="665" min="1" />
+        <span class="unit">paket</span>
+      </div>
+      <div class="input-error" id="pl-err">Masukkan nilai yang valid (Total Paket > 0)</div>
+      <button class="btn-hitung" onclick="hitungPacketLoss()">Hitung Packet Loss</button>
+      <div class="result-area" id="pl-result">
+        <div class="result-label">Hasil</div>
+        <div class="result-steps" id="pl-steps"></div>
+        <div class="loss-bar-wrap" id="pl-bar-wrap">
+          <div class="loss-bar-track">
+            <div class="loss-bar-fill" id="pl-bar" style="width:0%"></div>
+          </div>
+          <div class="loss-status" id="pl-status"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // === HELPER ===
+  function fmt(n, d = 6) {
+    return parseFloat(n.toFixed(d)).toLocaleString('id-ID', { maximumFractionDigits: d });
+  }
+
+  function fmtMono(n, d = 6) {
+    return n.toFixed(d).replace('.', ',');
+  }
+
+  function showError(id, show) {
+    document.getElementById(id).style.display = show ? 'block' : 'none';
+  }
+
+  function buildSteps(lines) {
+    return lines.map((l, i) => {
+      const isFinal = i === lines.length - 1;
+      return `<div class="step-line ${isFinal ? 'step-final' : ''}">
+        <span class="step-op">${l.op}</span>
+        <span class="step-val">${l.val}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // === 1. THROUGHPUT ===
+  function hitungThroughput() {
+    const bytes = parseFloat(document.getElementById('tp-bytes').value);
+    const time  = parseFloat(document.getElementById('tp-time').value);
+
+    if (!bytes || !time || bytes <= 0 || time <= 0) {
+      showError('tp-err', true);
+      document.getElementById('tp-result').classList.remove('show');
+      return;
+    }
+    showError('tp-err', false);
+
+    const bits   = bytes * 8;
+    const bps    = bits / time;
+    const kbps   = bps / 1000;
+    const mbps   = bps / 1000000;
+
+    const steps = buildSteps([
+      { op: 'Throughput =', val: `(${fmt(bytes, 0)} × 8) / ${fmt(time, 3)}` },
+      { op: '=',            val: `${fmt(bits, 0)} / ${fmt(time, 3)}` },
+      { op: '=',            val: `${fmt(bps, 3)} bps` },
+      { op: '=',            val: `${fmt(kbps, 3)} kbps` },
+      { op: '=',            val: `${fmt(mbps, 6)} Mbps` },
+    ]);
+
+    document.getElementById('tp-steps').innerHTML = steps;
+    document.getElementById('tp-result').classList.add('show');
+  }
+
+  // === 2. DELAY ===
+  function hitungDelay() {
+    const total = parseFloat(document.getElementById('dl-total').value);
+    const paket = parseFloat(document.getElementById('dl-paket').value);
+
+    if (!total || !paket || total <= 0 || paket <= 0) {
+      showError('dl-err', true);
+      document.getElementById('dl-result').classList.remove('show');
+      return;
+    }
+    showError('dl-err', false);
+
+    const avgDetik = total / paket;
+    const avgMs    = avgDetik * 1000;
+
+    const steps = buildSteps([
+      { op: 'Rata-rata Delay =', val: `${fmt(total, 6)} / ${fmt(paket, 0)}` },
+      { op: '=',                 val: `${avgDetik.toFixed(9)} detik` },
+      { op: '=',                 val: `${fmt(avgMs, 6)} ms` },
+    ]);
+
+    document.getElementById('dl-steps').innerHTML = steps;
+    document.getElementById('dl-result').classList.add('show');
+  }
+
+  // === 3. JITTER ===
+  function hitungJitter() {
+    const total = parseFloat(document.getElementById('jt-total').value);
+    const paket = parseFloat(document.getElementById('jt-paket').value);
+
+    if (isNaN(total) || !paket || total < 0 || paket <= 0) {
+      showError('jt-err', true);
+      document.getElementById('jt-result').classList.remove('show');
+      return;
+    }
+    showError('jt-err', false);
+
+    const avgDetik = total / paket;
+    const avgMs    = avgDetik * 1000;
+
+    const steps = buildSteps([
+      { op: 'Rata-rata Jitter =', val: `${fmt(total, 6)} / ${fmt(paket, 0)}` },
+      { op: '=',                  val: `${avgDetik.toFixed(12)} detik` },
+      { op: '=',                  val: `${avgDetik.toFixed(9).replace('.', ',')} ms (× 1000)` },
+      { op: '=',                  val: `${fmt(avgMs, 6)} ms` },
+    ]);
+
+    document.getElementById('jt-steps').innerHTML = steps;
+    document.getElementById('jt-result').classList.add('show');
+  }
+
+  // === 4. PACKET LOSS ===
+  function hitungPacketLoss() {
+    const lost  = parseFloat(document.getElementById('pl-lost').value);
+    const total = parseFloat(document.getElementById('pl-total').value);
+
+    if (isNaN(lost) || !total || lost < 0 || total <= 0 || lost > total) {
+      showError('pl-err', true);
+      document.getElementById('pl-result').classList.remove('show');
+      return;
+    }
+    showError('pl-err', false);
+
+    const ratio   = lost / total;
+    const persen  = ratio * 100;
+
+    // status label ITU-T G.1010
+    let statusIcon, statusText, statusColor;
+    if (persen === 0)        { statusIcon = '✅'; statusText = 'Sempurna (0%)';    statusColor = '#2a7a4a'; }
+    else if (persen <= 1)    { statusIcon = '✅'; statusText = 'Sangat Baik';      statusColor = '#2a7a4a'; }
+    else if (persen <= 5)    { statusIcon = '🟡'; statusText = 'Baik';             statusColor = '#b5890a'; }
+    else if (persen <= 10)   { statusIcon = '🟠'; statusText = 'Sedang';           statusColor = '#b5541a'; }
+    else                     { statusIcon = '🔴'; statusText = 'Buruk';            statusColor = '#c0392b'; }
+
+    const steps = buildSteps([
+      { op: 'Packet Loss =', val: `(${fmt(lost, 0)} / ${fmt(total, 0)}) × 100` },
+      { op: '=',             val: `${ratio.toFixed(9)} × 100` },
+      { op: '=',             val: `${fmt(persen, 3)} %` },
+    ]);
+
+    document.getElementById('pl-steps').innerHTML = steps;
+
+    // bar
+    const barPct = Math.min(persen, 100);
+    document.getElementById('pl-bar').style.width = barPct + '%';
+    document.getElementById('pl-bar').style.background = statusColor;
+    document.getElementById('pl-status').innerHTML =
+      `<span style="color:${statusColor}">${statusIcon} ${statusText}</span>`;
+
+    document.getElementById('pl-result').classList.add('show');
+  }
+
+  // === ENTER KEY ===
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const active = document.activeElement;
+    if (!active || active.tagName !== 'INPUT') return;
+    const id = active.id;
+    if (id.startsWith('tp-')) hitungThroughput();
+    else if (id.startsWith('dl-')) hitungDelay();
+    else if (id.startsWith('jt-')) hitungJitter();
+    else if (id.startsWith('pl-')) hitungPacketLoss();
+  });
+</script>
+</body>
+</html>
