@@ -10,7 +10,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <style>
-    /* === VARIABLES === */
     :root {
       --bg: #f4f1ec;
       --bg-card: #ffffff;
@@ -22,15 +21,11 @@
       --text-result: #2c2520;
       --accent: #b5541a;
       --accent-light: #f0e6d8;
-      --accent2: #1a5c8a;
-      --accent3: #2a7a4a;
-      --accent4: #7a1a4a;
       --shadow: 0 2px 12px rgba(0,0,0,0.07);
       --shadow-hover: 0 6px 24px rgba(0,0,0,0.12);
       --radius: 12px;
     }
 
-    /* === BASE === */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -41,7 +36,6 @@
       padding: 2rem 1rem 4rem;
     }
 
-    /* === HEADER === */
     .qos-header {
       text-align: center;
       margin-bottom: 2.5rem;
@@ -76,7 +70,6 @@
       font-weight: 300;
     }
 
-    /* === GRID === */
     .qos-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -89,15 +82,15 @@
       .qos-grid { grid-template-columns: 1fr; }
     }
 
-    /* === CARD === */
     .qos-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      overflow: hidden;
+      overflow: visible;
       box-shadow: var(--shadow);
       transition: box-shadow 0.25s ease, transform 0.25s ease;
       animation: fadeUp 0.5s ease both;
+      position: relative;
     }
 
     .qos-card:hover {
@@ -110,13 +103,13 @@
     .qos-card:nth-child(3) { animation-delay: 0.3s; }
     .qos-card:nth-child(4) { animation-delay: 0.4s; }
 
-    /* === CARD HEADER === */
     .card-head {
       display: flex;
       align-items: center;
       gap: 0.6rem;
       padding: 1rem 1.25rem 0.9rem;
       border-bottom: 1px solid var(--border);
+      position: relative;
     }
 
     .card-num {
@@ -141,23 +134,120 @@
       letter-spacing: 0.02em;
     }
 
-    .card-icon {
-      margin-left: auto;
-      color: var(--accent-color, var(--accent));
-      font-size: 1.1rem;
-      opacity: 0.6;
-    }
-
-    /* card accent colors */
     .card-throughput { --accent-color: #b5541a; }
     .card-delay      { --accent-color: #1a5c8a; }
     .card-jitter     { --accent-color: #2a7a4a; }
     .card-loss       { --accent-color: #7a1a4a; }
 
-    /* === CARD BODY === */
+    .info-btn {
+      margin-left: auto;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent-color, var(--accent));
+      color: var(--accent-color, var(--accent));
+      background: transparent;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      flex-shrink: 0;
+      font-family: 'DM Sans', sans-serif;
+      position: relative;
+      z-index: 10;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .info-btn:hover,
+    .info-btn.active {
+      background: var(--accent-color, var(--accent));
+      color: #fff;
+    }
+
+    .info-popover {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 280px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      z-index: 999;
+      padding: 1rem;
+      display: none;
+      animation: popIn 0.2s ease both;
+    }
+
+    .info-popover.show { display: block; }
+
+    .info-popover::before {
+      content: '';
+      position: absolute;
+      top: -7px;
+      right: 8px;
+      width: 13px;
+      height: 13px;
+      background: #fff;
+      border-left: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      transform: rotate(45deg);
+    }
+
+    .popover-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 0.88rem;
+      color: var(--accent-color, var(--accent));
+      margin-bottom: 0.7rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .popover-formula {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      background: var(--bg-result, #f8f6f2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.7rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .popover-vars { display: flex; flex-direction: column; gap: 0.55rem; }
+
+    .popover-var-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+
+    .popover-var-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .popover-var-src {
+      font-size: 0.68rem;
+      color: var(--accent-color, var(--accent));
+      font-family: 'DM Mono', monospace;
+      margin-top: 0.15rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
     .card-body-qos { padding: 1.25rem; }
 
-    /* === INPUT GROUP === */
     .input-row {
       display: flex;
       align-items: center;
@@ -198,7 +288,6 @@
       white-space: nowrap;
     }
 
-    /* === BUTTON === */
     .btn-hitung {
       width: 100%;
       margin-top: 0.75rem;
@@ -218,7 +307,6 @@
     .btn-hitung:hover { opacity: 0.88; transform: translateY(-1px); }
     .btn-hitung:active { transform: translateY(0); }
 
-    /* === RESULT AREA === */
     .result-area {
       margin-top: 1rem;
       background: var(--bg-result);
@@ -250,7 +338,6 @@
       background: var(--border);
     }
 
-    /* === STEP BY STEP === */
     .result-steps {
       font-family: 'DM Mono', monospace;
       font-size: 0.8rem;
@@ -277,10 +364,7 @@
       font-weight: 500;
     }
 
-    /* === PACKET LOSS BAR === */
-    .loss-bar-wrap {
-      margin-top: 0.75rem;
-    }
+    .loss-bar-wrap { margin-top: 0.75rem; }
 
     .loss-bar-track {
       height: 8px;
@@ -293,7 +377,6 @@
     .loss-bar-fill {
       height: 100%;
       border-radius: 99px;
-      background: var(--accent4);
       transition: width 0.6s cubic-bezier(.4,0,.2,1);
     }
 
@@ -305,7 +388,6 @@
       gap: 0.3rem;
     }
 
-    /* === ERROR === */
     .input-error {
       font-size: 0.72rem;
       color: #c0392b;
@@ -313,7 +395,6 @@
       display: none;
     }
 
-    /* === ANIMATIONS === */
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-16px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -328,26 +409,53 @@
       from { opacity: 0; }
       to   { opacity: 1; }
     }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
   </style>
 </head>
 <body>
 
-<!-- === HEADER === -->
+<!-- header -->
 <div class="qos-header">
   <div class="badge-label">Wireshark · QoS Analysis</div>
   <h1>Network QoS Calculator</h1>
   <p>Hitung Throughput, Delay, Jitter, dan Packet Loss secara terpisah</p>
 </div>
 
-<!-- === GRID === -->
+<!-- grid -->
 <div class="qos-grid">
 
-  <!-- 1. THROUGHPUT -->
+  <!-- card throughput -->
   <div class="qos-card card-throughput">
     <div class="card-head">
       <div class="card-num">1</div>
       <span class="card-title">Throughput</span>
-      <i class="bi bi-speedometer2 card-icon"></i>
+      <!-- tombol info -->
+      <button class="info-btn" data-target="pop-tp" aria-label="Info rumus">i</button>
+      <!-- popover throughput -->
+      <div class="info-popover" id="pop-tp">
+        <div class="popover-title">📐 Rumus Throughput</div>
+        <div class="popover-formula">(Jumlah Bytes × 8) / Time Span</div>
+        <div class="popover-vars">
+          <div class="popover-var-item">
+            <div class="popover-var-name">Jumlah Bytes</div>
+            <div class="popover-var-desc">Total ukuran semua paket yang diterima (bytes)</div>
+            <div class="popover-var-src">📍 Statistics → Capture File Properties</div>
+          </div>
+          <div class="popover-var-item">
+            <div class="popover-var-name">Time Span</div>
+            <div class="popover-var-desc">Selisih waktu paket pertama dan terakhir (detik)</div>
+            <div class="popover-var-src">📍 Kolom Time: nilai paket terakhir − pertama</div>
+          </div>
+          <div class="popover-var-item">
+            <div class="popover-var-name">× 8</div>
+            <div class="popover-var-desc">Konversi Bytes → Bits (1 byte = 8 bits)</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="card-body-qos">
       <div class="input-row">
@@ -369,12 +477,29 @@
     </div>
   </div>
 
-  <!-- 2. DELAY -->
+  <!-- card delay -->
   <div class="qos-card card-delay">
     <div class="card-head">
       <div class="card-num">2</div>
       <span class="card-title">Delay</span>
-      <i class="bi bi-clock-history card-icon"></i>
+      <button class="info-btn" data-target="pop-dl" aria-label="Info rumus">i</button>
+      <!-- popover delay -->
+      <div class="info-popover" id="pop-dl">
+        <div class="popover-title">📐 Rumus Delay</div>
+        <div class="popover-formula">Rata-rata Delay = Total Delay / Jumlah Paket</div>
+        <div class="popover-vars">
+          <div class="popover-var-item">
+            <div class="popover-var-name">Total Delay</div>
+            <div class="popover-var-desc">Jumlah seluruh selisih waktu antar paket (Σ delta time)</div>
+            <div class="popover-var-src">📍 Kolom Time: hitung Σ (Time[n] − Time[n-1])</div>
+          </div>
+          <div class="popover-var-item">
+            <div class="popover-var-name">Jumlah Paket</div>
+            <div class="popover-var-desc">Total paket yang tertangkap Wireshark</div>
+            <div class="popover-var-src">📍 Statistics → Capture File Properties → Packets</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="card-body-qos">
       <div class="input-row">
@@ -396,12 +521,29 @@
     </div>
   </div>
 
-  <!-- 3. JITTER -->
+  <!-- card jitter -->
   <div class="qos-card card-jitter">
     <div class="card-head">
       <div class="card-num">3</div>
       <span class="card-title">Jitter</span>
-      <i class="bi bi-activity card-icon"></i>
+      <button class="info-btn" data-target="pop-jt" aria-label="Info rumus">i</button>
+      <!-- popover jitter -->
+      <div class="info-popover" id="pop-jt">
+        <div class="popover-title">📐 Rumus Jitter</div>
+        <div class="popover-formula">Rata-rata Jitter = Total Jitter / Jumlah Paket</div>
+        <div class="popover-vars">
+          <div class="popover-var-item">
+            <div class="popover-var-name">Total Jitter</div>
+            <div class="popover-var-desc">Jumlah seluruh nilai absolut selisih delta time antar paket</div>
+            <div class="popover-var-src">📍 Σ |Delta Time[n] − Delta Time[n-1]| di Wireshark</div>
+          </div>
+          <div class="popover-var-item">
+            <div class="popover-var-name">Jumlah Paket</div>
+            <div class="popover-var-desc">Total paket yang tertangkap Wireshark</div>
+            <div class="popover-var-src">📍 Statistics → Capture File Properties → Packets</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="card-body-qos">
       <div class="input-row">
@@ -423,12 +565,29 @@
     </div>
   </div>
 
-  <!-- 4. PACKET LOSS -->
+  <!-- card packet loss -->
   <div class="qos-card card-loss">
     <div class="card-head">
       <div class="card-num">4</div>
       <span class="card-title">Packet Loss</span>
-      <i class="bi bi-wifi-off card-icon"></i>
+      <button class="info-btn" data-target="pop-pl" aria-label="Info rumus">i</button>
+      <!-- popover packet loss -->
+      <div class="info-popover" id="pop-pl">
+        <div class="popover-title">📐 Rumus Packet Loss</div>
+        <div class="popover-formula">(Lost Segment / Total Paket) × 100</div>
+        <div class="popover-vars">
+          <div class="popover-var-item">
+            <div class="popover-var-name">Lost Segment</div>
+            <div class="popover-var-desc">Jumlah paket yang hilang saat transmisi</div>
+            <div class="popover-var-src">📍 Wireshark filter: tcp.analysis.lost_segment</div>
+          </div>
+          <div class="popover-var-item">
+            <div class="popover-var-name">Total Paket</div>
+            <div class="popover-var-desc">Total paket yang tertangkap Wireshark</div>
+            <div class="popover-var-src">📍 Statistics → Capture File Properties → Packets</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="card-body-qos">
       <div class="input-row">
@@ -446,7 +605,7 @@
       <div class="result-area" id="pl-result">
         <div class="result-label">Hasil</div>
         <div class="result-steps" id="pl-steps"></div>
-        <div class="loss-bar-wrap" id="pl-bar-wrap">
+        <div class="loss-bar-wrap">
           <div class="loss-bar-track">
             <div class="loss-bar-fill" id="pl-bar" style="width:0%"></div>
           </div>
@@ -460,13 +619,58 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // === HELPER ===
-  function fmt(n, d = 6) {
-    return parseFloat(n.toFixed(d)).toLocaleString('id-ID', { maximumFractionDigits: d });
+  // deteksi touch device
+  const isTouch = () => window.matchMedia('(hover: none)').matches;
+
+  const allPopovers = document.querySelectorAll('.info-popover');
+  const allBtns     = document.querySelectorAll('.info-btn');
+
+  function closeAll(except) {
+    allPopovers.forEach(p => { if (p !== except) p.classList.remove('show'); });
+    allBtns.forEach(b => { if (b.dataset.target !== except?.id) b.classList.remove('active'); });
   }
 
-  function fmtMono(n, d = 6) {
-    return n.toFixed(d).replace('.', ',');
+  allBtns.forEach(btn => {
+    const popover = document.getElementById(btn.dataset.target);
+
+    if (!isTouch()) {
+      // desktop: hover
+      btn.addEventListener('mouseenter', () => {
+        closeAll(popover);
+        popover.classList.add('show');
+        btn.classList.add('active');
+      });
+
+      btn.closest('.card-head').addEventListener('mouseleave', (e) => {
+        if (!popover.contains(e.relatedTarget) && e.relatedTarget !== btn) {
+          popover.classList.remove('show');
+          btn.classList.remove('active');
+        }
+      });
+
+      popover.addEventListener('mouseleave', () => {
+        popover.classList.remove('show');
+        btn.classList.remove('active');
+      });
+    } else {
+      // mobile/tablet: tap
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = popover.classList.contains('show');
+        closeAll();
+        if (!isOpen) {
+          popover.classList.add('show');
+          btn.classList.add('active');
+        }
+      });
+    }
+  });
+
+  // tutup popover klik di luar (touch)
+  document.addEventListener('click', () => { if (isTouch()) closeAll(); });
+
+  function fmt(n, d = 6) {
+    return parseFloat(n.toFixed(d)).toLocaleString('id-ID', { maximumFractionDigits: d });
   }
 
   function showError(id, show) {
@@ -483,134 +687,104 @@
     }).join('');
   }
 
-  // === 1. THROUGHPUT ===
+  // hitung throughput
   function hitungThroughput() {
     const bytes = parseFloat(document.getElementById('tp-bytes').value);
     const time  = parseFloat(document.getElementById('tp-time').value);
-
     if (!bytes || !time || bytes <= 0 || time <= 0) {
       showError('tp-err', true);
       document.getElementById('tp-result').classList.remove('show');
       return;
     }
     showError('tp-err', false);
-
-    const bits   = bytes * 8;
-    const bps    = bits / time;
-    const kbps   = bps / 1000;
-    const mbps   = bps / 1000000;
-
-    const steps = buildSteps([
-      { op: 'Throughput =', val: `(${fmt(bytes, 0)} × 8) / ${fmt(time, 3)}` },
-      { op: '=',            val: `${fmt(bits, 0)} / ${fmt(time, 3)}` },
-      { op: '=',            val: `${fmt(bps, 3)} bps` },
-      { op: '=',            val: `${fmt(kbps, 3)} kbps` },
-      { op: '=',            val: `${fmt(mbps, 6)} Mbps` },
+    const bits = bytes * 8;
+    const bps  = bits / time;
+    const kbps = bps / 1000;
+    const mbps = bps / 1000000;
+    document.getElementById('tp-steps').innerHTML = buildSteps([
+      { op: 'Throughput =', val: `(${fmt(bytes,0)} × 8) / ${fmt(time,3)}` },
+      { op: '=',            val: `${fmt(bits,0)} / ${fmt(time,3)}` },
+      { op: '=',            val: `${fmt(bps,3)} bps` },
+      { op: '=',            val: `${fmt(kbps,3)} kbps` },
+      { op: '=',            val: `${fmt(mbps,6)} Mbps` },
     ]);
-
-    document.getElementById('tp-steps').innerHTML = steps;
     document.getElementById('tp-result').classList.add('show');
   }
 
-  // === 2. DELAY ===
+  // hitung delay
   function hitungDelay() {
     const total = parseFloat(document.getElementById('dl-total').value);
     const paket = parseFloat(document.getElementById('dl-paket').value);
-
     if (!total || !paket || total <= 0 || paket <= 0) {
       showError('dl-err', true);
       document.getElementById('dl-result').classList.remove('show');
       return;
     }
     showError('dl-err', false);
-
     const avgDetik = total / paket;
     const avgMs    = avgDetik * 1000;
-
-    const steps = buildSteps([
-      { op: 'Rata-rata Delay =', val: `${fmt(total, 6)} / ${fmt(paket, 0)}` },
+    document.getElementById('dl-steps').innerHTML = buildSteps([
+      { op: 'Rata-rata Delay =', val: `${fmt(total,6)} / ${fmt(paket,0)}` },
       { op: '=',                 val: `${avgDetik.toFixed(9)} detik` },
-      { op: '=',                 val: `${fmt(avgMs, 6)} ms` },
+      { op: '=',                 val: `${fmt(avgMs,6)} ms` },
     ]);
-
-    document.getElementById('dl-steps').innerHTML = steps;
     document.getElementById('dl-result').classList.add('show');
   }
 
-  // === 3. JITTER ===
+  // hitung jitter
   function hitungJitter() {
     const total = parseFloat(document.getElementById('jt-total').value);
     const paket = parseFloat(document.getElementById('jt-paket').value);
-
     if (isNaN(total) || !paket || total < 0 || paket <= 0) {
       showError('jt-err', true);
       document.getElementById('jt-result').classList.remove('show');
       return;
     }
     showError('jt-err', false);
-
     const avgDetik = total / paket;
     const avgMs    = avgDetik * 1000;
-
-    const steps = buildSteps([
-      { op: 'Rata-rata Jitter =', val: `${fmt(total, 6)} / ${fmt(paket, 0)}` },
+    document.getElementById('jt-steps').innerHTML = buildSteps([
+      { op: 'Rata-rata Jitter =', val: `${fmt(total,6)} / ${fmt(paket,0)}` },
       { op: '=',                  val: `${avgDetik.toFixed(12)} detik` },
-      { op: '=',                  val: `${avgDetik.toFixed(9).replace('.', ',')} ms (× 1000)` },
-      { op: '=',                  val: `${fmt(avgMs, 6)} ms` },
+      { op: '=',                  val: `${fmt(avgMs,9)} ms` },
     ]);
-
-    document.getElementById('jt-steps').innerHTML = steps;
     document.getElementById('jt-result').classList.add('show');
   }
 
-  // === 4. PACKET LOSS ===
+  // hitung packet loss
   function hitungPacketLoss() {
     const lost  = parseFloat(document.getElementById('pl-lost').value);
     const total = parseFloat(document.getElementById('pl-total').value);
-
     if (isNaN(lost) || !total || lost < 0 || total <= 0 || lost > total) {
       showError('pl-err', true);
       document.getElementById('pl-result').classList.remove('show');
       return;
     }
     showError('pl-err', false);
-
-    const ratio   = lost / total;
-    const persen  = ratio * 100;
-
-    // status label ITU-T G.1010
+    const ratio  = lost / total;
+    const persen = ratio * 100;
     let statusIcon, statusText, statusColor;
-    if (persen === 0)        { statusIcon = '✅'; statusText = 'Sempurna (0%)';    statusColor = '#2a7a4a'; }
-    else if (persen <= 1)    { statusIcon = '✅'; statusText = 'Sangat Baik';      statusColor = '#2a7a4a'; }
-    else if (persen <= 5)    { statusIcon = '🟡'; statusText = 'Baik';             statusColor = '#b5890a'; }
-    else if (persen <= 10)   { statusIcon = '🟠'; statusText = 'Sedang';           statusColor = '#b5541a'; }
-    else                     { statusIcon = '🔴'; statusText = 'Buruk';            statusColor = '#c0392b'; }
-
-    const steps = buildSteps([
-      { op: 'Packet Loss =', val: `(${fmt(lost, 0)} / ${fmt(total, 0)}) × 100` },
+    if (persen === 0)      { statusIcon = '✅'; statusText = 'Sempurna (0%)'; statusColor = '#2a7a4a'; }
+    else if (persen <= 1)  { statusIcon = '✅'; statusText = 'Sangat Baik';   statusColor = '#2a7a4a'; }
+    else if (persen <= 5)  { statusIcon = '🟡'; statusText = 'Baik';          statusColor = '#b5890a'; }
+    else if (persen <= 10) { statusIcon = '🟠'; statusText = 'Sedang';        statusColor = '#b5541a'; }
+    else                   { statusIcon = '🔴'; statusText = 'Buruk';         statusColor = '#c0392b'; }
+    document.getElementById('pl-steps').innerHTML = buildSteps([
+      { op: 'Packet Loss =', val: `(${fmt(lost,0)} / ${fmt(total,0)}) × 100` },
       { op: '=',             val: `${ratio.toFixed(9)} × 100` },
-      { op: '=',             val: `${fmt(persen, 3)} %` },
+      { op: '=',             val: `${fmt(persen,3)} %` },
     ]);
-
-    document.getElementById('pl-steps').innerHTML = steps;
-
-    // bar
-    const barPct = Math.min(persen, 100);
-    document.getElementById('pl-bar').style.width = barPct + '%';
+    document.getElementById('pl-bar').style.width = Math.min(persen, 100) + '%';
     document.getElementById('pl-bar').style.background = statusColor;
-    document.getElementById('pl-status').innerHTML =
-      `<span style="color:${statusColor}">${statusIcon} ${statusText}</span>`;
-
+    document.getElementById('pl-status').innerHTML = `<span style="color:${statusColor}">${statusIcon} ${statusText}</span>`;
     document.getElementById('pl-result').classList.add('show');
   }
 
-  // === ENTER KEY ===
+  // enter key trigger hitung
   document.addEventListener('keydown', function(e) {
     if (e.key !== 'Enter') return;
-    const active = document.activeElement;
-    if (!active || active.tagName !== 'INPUT') return;
-    const id = active.id;
-    if (id.startsWith('tp-')) hitungThroughput();
+    const id = document.activeElement?.id || '';
+    if (id.startsWith('tp-'))      hitungThroughput();
     else if (id.startsWith('dl-')) hitungDelay();
     else if (id.startsWith('jt-')) hitungJitter();
     else if (id.startsWith('pl-')) hitungPacketLoss();
