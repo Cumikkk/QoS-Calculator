@@ -974,3 +974,23 @@ body {
     font-size: 0.62rem;
   }
 }
+
+/* footer */
+.qos-footer {
+  max-width: 960px;
+  margin: 2.5rem auto 0;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.qos-footer p {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.qos-footer-sub {
+  opacity: 0.6;
+}

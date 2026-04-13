@@ -167,8 +167,8 @@ QoS Calculator/
 │       ├── main.js                # Popover & download logic
 │       ├── calculator.js          # Fungsi perhitungan QoS
 │       └── csv-parser.js          # CSV parser Wireshark
-├── README.md                       # Dokumentasi ini
-└── KODE_LENGKAP.md                # Semua kode dalam satu file
+├── LICENSE                         # MIT License
+└── README.md                       # Dokumentasi ini
 ```
 
 ---
@@ -269,10 +269,13 @@ QoS Calculator/
 
 ## 📄 License
 
-Open Source - Bebas digunakan untuk keperluan pendidikan, riset, dan bisnis.
+MIT License — © 2025 M. Fahrul Alfanani
+
+Bebas digunakan, dimodifikasi, dan didistribusikan untuk keperluan apapun (pendidikan, riset, maupun komersial) selama mencantumkan copyright notice asli. Lihat file [LICENSE](LICENSE) untuk detail lengkap.
 
 ---
 
+**Author**: M. Fahrul Alfanani  
 **Version**: 1.0.0  
 **Last Updated**: 2026-04-13  
 **Status**: Production Ready ✅
