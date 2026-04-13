@@ -269,7 +269,7 @@ QoS Calculator/
 
 ## 📄 License
 
-MIT License — © 2025 M. Fahrul Alfanani
+MIT License — © 2026 M. Fahrul Alfanani
 
 Bebas digunakan, dimodifikasi, dan didistribusikan untuk keperluan apapun (pendidikan, riset, maupun komersial) selama mencantumkan copyright notice asli. Lihat file [LICENSE](LICENSE) untuk detail lengkap.
 
